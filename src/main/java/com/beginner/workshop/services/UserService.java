@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.beginner.workshop.exceptions.ControllerNotFoundException;
+import com.beginner.workshop.exceptions.DataBaseException;
 import com.beginner.workshop.models.User;
 import com.beginner.workshop.repositories.UserRepository;
 
@@ -30,7 +33,13 @@ public class UserService {
 	}
 
 	public void deleteById(Long id) {
+		try {
 		repository.deleteById(id);
+		} catch(EmptyResultDataAccessException e) {
+			throw new ControllerNotFoundException(id);
+		} catch(DataIntegrityViolationException e) {
+			throw new DataBaseException(e.getMessage());
+		}
 	}
 
 	public User update(Long id, User obj) {
