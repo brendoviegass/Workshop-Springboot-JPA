@@ -13,6 +13,8 @@ import com.beginner.workshop.exceptions.DataBaseException;
 import com.beginner.workshop.models.User;
 import com.beginner.workshop.repositories.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class UserService {
 
@@ -34,18 +36,22 @@ public class UserService {
 
 	public void deleteById(Long id) {
 		try {
-		repository.deleteById(id);
-		} catch(EmptyResultDataAccessException e) {
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
 			throw new ControllerNotFoundException(id);
-		} catch(DataIntegrityViolationException e) {
+		} catch (DataIntegrityViolationException e) {
 			throw new DataBaseException(e.getMessage());
 		}
 	}
 
 	public User update(Long id, User obj) {
-		User newEntity = repository.getReferenceById(id);
-		newUpdate(newEntity, obj);
-		return repository.save(newEntity);
+		try {
+			User newEntity = repository.getReferenceById(id);
+			newUpdate(newEntity, obj);
+			return repository.save(newEntity);
+		} catch (EntityNotFoundException e) {
+			throw new ControllerNotFoundException(id);
+		}
 	}
 
 	private void newUpdate(User newEntity, User obj) {
